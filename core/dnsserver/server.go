@@ -238,7 +238,8 @@ func (s *Server) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 
 			// Set the zone we found in the context so plugins can reference back to this, initially for setting the
 			// zone label in metrics.
-			ctx = context.WithValue(ctx, "zone", string(b[:l]))
+			ctx = context.WithValue(ctx, plugin.ZoneCtx, string(b[:l]))
+			ctx = context.WithValue(ctx, plugin.AddrCtx, s.Addr)
 
 			if r.Question[0].Qtype != dns.TypeDS {
 				if h.FilterFunc == nil {
@@ -284,7 +285,8 @@ func (s *Server) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 	if h, ok := s.zones["."]; ok && h.pluginChain != nil {
 
 		// See comment above.
-		ctx = context.WithValue(ctx, "zone", ".")
+		ctx = context.WithValue(ctx, plugin.ZoneCtx, ".")
+		ctx = context.WithValue(ctx, plugin.AddrCtx, s.Addr)
 
 		rcode, _ := h.pluginChain.ServeDNS(ctx, w, r)
 		if !plugin.ClientWrite(rcode) {
@@ -372,11 +374,10 @@ const (
 	maxreentries = 10
 )
 
-// Key is the context key for the current server
-type Key struct{}
-
-// loopKey is the context key for counting self loops
-type loopKey struct{}
+type (
+	Key     struct{} // Key is the context key for the current server
+	loopKey struct{} // loopKey is the context key for counting self loops
+)
 
 // enableChaos is a map with plugin names for which we should open CH class queries as
 // we block these by default.

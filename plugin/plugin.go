@@ -82,14 +82,15 @@ func NextOrFailure(name string, next Handler, ctx context.Context, w dns.Respons
 	return dns.RcodeServerFailure, Error(name, errors.New("no next plugin found"))
 }
 
-// ZoneFromContext returns the zone from within the context. CoreDNS sets this to the longest matching zone
-// from the Server Block.
-func ZoneFromContext(ctx context.Context) string {
-	z := ctx.Value("zone")
-	if z == nil {
-		return "." // default to root
-	}
-	return z.(string)
+// ServerFromContext returns the server info (zone and address) from within the
+// context. CoreDNS sets this to the longest matching zone from the Server
+// Block. It returns two strings, one with the zone, the other one with the listening address
+// which is something like "dns://:53".
+func ZoneFromContext(ctx context.Context) (string, string) {
+	z := ctx.Value(ZoneCtx)
+	a := ctx.Value(AddrCtx)
+
+	return z.(string), a.(string)
 }
 
 // ClientWrite returns true if the response has been written to the client.
@@ -116,3 +117,11 @@ var TimeBuckets = prometheus.ExponentialBuckets(0.00025, 2, 16) // from 0.25ms t
 
 // ErrOnce is returned when a plugin doesn't support multiple setups per server.
 var ErrOnce = errors.New("this plugin can only be used once per Server Block")
+
+type info string // info the key used to retrieve zone and addr info from the context.
+
+// Keys to pass server context to the plugin.
+const (
+	ZoneCtx info = "zone"
+	AddrCtx info = "addr"
+)
