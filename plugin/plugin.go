@@ -87,7 +87,7 @@ func NextOrFailure(name string, next Handler, ctx context.Context, w dns.Respons
 func ZoneFromContext(ctx context.Context) string {
 	z := ctx.Value("zone")
 	if z == nil {
-		return ""
+		return "." // default to root
 	}
 	return z.(string)
 }
