@@ -86,7 +86,7 @@ func NextOrFailure(name string, next Handler, ctx context.Context, w dns.Respons
 // context. CoreDNS sets this to the longest matching zone from the Server
 // Block. It returns two strings, one with the zone, the other one with the listening address
 // which is something like "dns://:53".
-func ZoneFromContext(ctx context.Context) (string, string) {
+func ServerFromContext(ctx context.Context) (string, string) {
 	z := ctx.Value(ZoneCtx)
 	a := ctx.Value(AddrCtx)
 

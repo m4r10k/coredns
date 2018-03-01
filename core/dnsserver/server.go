@@ -375,7 +375,8 @@ const (
 )
 
 type (
-	Key     struct{} // Key is the context key for the current server
+	// Key is the context key for the current server
+	Key     struct{}
 	loopKey struct{} // loopKey is the context key for counting self loops
 )
 
