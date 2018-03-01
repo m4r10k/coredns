@@ -235,6 +235,11 @@ func (s *Server) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 		}
 
 		if h, ok := s.zones[string(b[:l])]; ok {
+
+			// Set the zone we found in the context so plugins can reference back to this, initially for setting the
+			// zone label in metrics.
+			ctx = context.WithValue(ctx, "zone", string(b[:l]))
+
 			if r.Question[0].Qtype != dns.TypeDS {
 				if h.FilterFunc == nil {
 					rcode, _ := h.pluginChain.ServeDNS(ctx, w, r)
@@ -277,6 +282,10 @@ func (s *Server) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 
 	// Wildcard match, if we have found nothing try the root zone as a last resort.
 	if h, ok := s.zones["."]; ok && h.pluginChain != nil {
+
+		// See comment above.
+		ctx = context.WithValue(ctx, "zone", ".")
+
 		rcode, _ := h.pluginChain.ServeDNS(ctx, w, r)
 		if !plugin.ClientWrite(rcode) {
 			DefaultErrorFunc(w, r, rcode)

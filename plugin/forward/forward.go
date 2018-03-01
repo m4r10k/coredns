@@ -67,6 +67,9 @@ func (f *Forward) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg
 	var span, child ot.Span
 	span = ot.SpanFromContext(ctx)
 
+	z := plugin.ZoneFromContext(ctx)
+	println("zone", z)
+
 	for _, proxy := range f.list() {
 		if proxy.Down(f.maxfails) {
 			fails++
