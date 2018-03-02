@@ -236,8 +236,10 @@ func (s *Server) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 
 		if h, ok := s.zones[string(b[:l])]; ok {
 
-			// Set the zone we found in the context so plugins can reference back to this, initially for setting the
-			// zone label in metrics.
+			// Set the zone we found and the server's address in
+			// the context so plugins can reference back to this,
+			// initially for setting the zone label in metrics. This will
+			// makes those metrics unique.
 			ctx = context.WithValue(ctx, plugin.ZoneCtx, string(b[:l]))
 			ctx = context.WithValue(ctx, plugin.AddrCtx, s.Addr)
 
